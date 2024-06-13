@@ -1,10 +1,9 @@
 import tkinter as tk
-from tkinter import Menu, messagebox
-from ledger_form import LedgerForm
-from app_defines import *
-from import_database import * 
-from init_database import * 
+
 from account_statement import *
+from import_database import *
+from ledger_form import LedgerForm
+
 
 class LoginPage(tk.Frame):
     def __init__(self, master=None):
@@ -571,8 +570,3 @@ class LoginPage(tk.Frame):
         # self.master.overrideredirect(True)
         self.create_widgets()
         self.master.mainloop()
-# Usage example:
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = LoginPage(root)
-    root.mainloop()

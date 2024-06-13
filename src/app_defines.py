@@ -10,36 +10,9 @@
 # Version : 2.0
 """
 
-from tkinter import *
-from tkinter import messagebox
-from random import randint
-import os.path
-import shutil
-from functools import partial
-from calendar import monthrange
-from tkcalendar import Calendar, DateEntry
-from PIL import ImageTk, Image
-import PIL.Image
 # import cv2
-from tkinter import filedialog
-from datetime import *
-import re
-import openpyxl
-from tkinter import font
-from openpyxl.styles import Font
-from openpyxl.styles import Alignment
-from shutil import copyfile
 
 # from win32com import com_error
-import pandas as pd
-import subprocess
-import num2words
-import time
-import pyglet
-import pyautogui
-import sys
-
-from dateTime_operation import *
 
 
 # constants defined for Application
@@ -87,6 +60,11 @@ TIMES_NEW_ROMAN_BIG = ('times new roman', 16, 'normal')
 NORM_VERDANA_FONT = ('verdana', 10, 'normal')
 BOLD_VERDANA_FONT = ('verdana', 11, 'normal')
 LARGE_VERDANA_FONT = ('verdana', 13, 'normal')
+# defining fonts for usage in project
+MEDIUM_FONT = ('times new roman', 12, 'normal')
+XXL_FONT = ('times new roman', 25, 'normal')
+XL_FONT = ('times new roman', 20, 'normal')
+L_FONT = ('times new roman', 15, 'normal')
 
 # Path for databases
 PATH_STOCK = "Library_Stock\\Commercial_stock\\Commercial_Stock.xlsx"
