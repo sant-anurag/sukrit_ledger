@@ -1,6 +1,6 @@
 import ctypes
 
-from app_common import *
+from ledger_form import *
 
 
 class ledger_main:
@@ -10,13 +10,16 @@ class ledger_main:
         self.currentUser = ""
         self.main_menu()
 
-    def designMainScreen(self, master, user_category):
+    def createledgerentry(self, master):
+        LedgerForm(self.master)
+
+    def designmainscreen(self, master, user_category):
         labelFrame = Label(master, text="Inventory & Sales Management", justify=CENTER,
                            font=XXL_FONT,
                            fg='black')
         # labelFrame.place(x=200, y=10)
-        # result_btnInv = partial(self.new_inventory_view)
-        btn_inventory = Button(master, text="Inventory", fg="Black", command=NONE,
+        result_btnInv = partial(self.createledgerentry, master)
+        btn_inventory = Button(master, text="Inventory", fg="Black", command=result_btnInv,
                                font=XL_FONT, width=20, state=NORMAL, bg='RosyBrown1')
         # labelFrame.place(x=200, y=10)
         # result_btnShopper = partial(self.new_shopper_view)
@@ -180,7 +183,7 @@ class ledger_main:
             print("Authentication Success for user :", userNameText.get())
             login_window.destroy()
             print("Username = ", self.currentUser, "Category = ", curUser_category)
-            self.designMainScreen(self.master, curUser_category)
+            self.designmainscreen(self.master, curUser_category)
         else:
             # log the user action
             # self.obj_commonUtil.logActivity("Login failure")

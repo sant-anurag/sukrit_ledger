@@ -1,115 +1,173 @@
-import tkinter as tk
-from app_defines import *
-from app_defines import *
-from app_common import *
 from init_database import *
-from app_thread import *
 import os
-from openpyxl import Workbook, load_workbook
-from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter
 import tkinter as tk
-from tkinter import W,E,messagebox
-from PIL import ImageGrab
-from openpyxl.utils.exceptions import InvalidFileException
 from datetime import datetime
-from pathlib import Path
+from tkinter import E, messagebox
+
+from PIL import ImageGrab
+from openpyxl import Workbook, load_workbook
+from openpyxl.utils.exceptions import InvalidFileException
+
+from app_thread import *
+from init_database import *
 
 
 class LedgerForm(tk.Toplevel):
-    def __init__(self, master=None):
-        super().__init__(master)
-        self.title("Ledger Form")
-        self.geometry("1000x1000")  # Set the window size to 600x600 pixels
-        self.configure(bg='lightblue')  # Set background color to light blue
-        self.previous_balance_entry = tk.Entry(state='readonly')
-        self.total_balance_entry = tk.Entry(state='readonly')
+    def __init__(self, master):
+        self.obj_commonUtil = None
+        self.newItem_window = Toplevel(master)
+        self.newItem_window.title("Ledger Form")
+        width, height = pyautogui.size()
+        self.newItem_window.title("Inventory Operations")
+        self.newItem_window.geometry(
+            '{}x{}+{}+{}'.format(int('425'), int('530'), int(width / 2.82), int(height / 4)))
+
+        self.newItem_window.configure(bg="wheat")  # Set background color to light blue
+
+        self.newItem_window.configure(background='wheat')
+        self.newItem_window.resizable(width=False, height=False)
+        self.newItem_window.protocol('WM_DELETE_WINDOW', self.doNothing)
+        """
+        imageFrame = Frame(self.newItem_window, width=65, height=60,
+                           bg="wheat")
+        canvas_width, canvas_height = 60, 60
+        canvas = Canvas(imageFrame, width=canvas_width, height=canvas_height, highlightthickness=0)
+        myimage = ImageTk.PhotoImage(PIL.Image.open("..\\Images\\a_wheat.png").resize((60, 60)))
+        canvas.create_image(0, 0, anchor=NW, image=myimage)
+        imageFrame.grid(row=0, column=0, pady=2)
+        canvas.grid(row=0, column=0)
+        """
+        self.newItem_window.previous_balance_entry = Entry(state='readonly')
+        self.newItem_window.total_balance_entry = Entry(state='readonly')
+
         # Create a container frame to hold all the widgets
-        container = tk.Frame(self, bg='lightblue')
-        container.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        container = Frame(self.newItem_window, bg='wheat')
+        container.grid(row=0, column=0, pady=2)
 
-        self.heading_label = tk.Label(container, text="Ledger Form", bg='lightblue', font=("Helvetica", 16, "bold"))
-        self.heading_label.grid(row=0, columnspan=2, pady=10)
-        
+        self.newItem_window.heading_label = Label(container, text="Ledger Form", bg='wheat',
+                                                  font=("Helvetica", 16, "bold"))
+        self.newItem_window.heading_label.grid(row=0, columnspan=2, pady=10)
+
         # Create labels and entry fields for each ledger field
-        self.date_label = tk.Label(container, text="Date:", bg='lightblue')
-        self.date_entry = tk.Entry(container)
-        
-        self.party_name_label = tk.Label(container, text="Party's Name:", bg='lightblue')
-        self.party_name_entry = tk.Entry(container)
-        
-        self.location_label = tk.Label(container, text="Location:", bg='lightblue')
-        self.location_entry = tk.Entry(container)
+        self.newItem_window.date_label = Label(container, text="Date", bg='wheat', width=14, justify='left', anchor='w',
+                                               font=L_FONT)
+        self.newItem_window.date_entry = Entry(container, width=20, font=NORM_FONT_MEDIUM_HIGH, bd=2, relief='ridge',
+                                               bg='light yellow')
 
-        self.party_name_entry.bind("<FocusOut>", self.load_previous_balance)
-        
-        self.invoice_no_label = tk.Label(container, text="Invoice No:", bg='lightblue')
-        self.invoice_no_entry = tk.Entry(container)
-        
-        self.billing_amount_label = tk.Label(container, text="Billing Amount:", bg='lightblue')
-        self.billing_amount_entry = tk.Entry(container)
-        
-        self.amount_received_label = tk.Label(container, text="Amount Received:", bg='lightblue')
-        self.amount_received_entry = tk.Entry(container)
+        self.newItem_window.party_name_label = Label(container, text="Party's Name", width=14, justify='left',
+                                                     anchor='w', font=L_FONT,
+                                                     bg='wheat')
+        self.newItem_window.party_name_entry = Entry(container, width=20, font=NORM_FONT_MEDIUM_HIGH, bd=2,
+                                                     relief='ridge',
+                                                     bg='light yellow')
 
-        self.receipt_ref_no_label = tk.Label(container, text="MR No.:", bg='lightblue')
-        self.receipt_ref_no_entry = tk.Entry(container)
-        
-        self.amount_balance_label = tk.Label(container, text="Amount Balance:", bg='lightblue')
-        self.amount_balance_entry = tk.Entry(container, state='readonly')
-        
-        self.previous_balance_label = tk.Label(container, text="Previous Balance:", bg='lightblue')
-        self.previous_balance_entry = tk.Entry(container, state='readonly')
+        self.newItem_window.location_label = Label(container, text="Location", bg='wheat', width=14, justify='left',
+                                                   anchor='w', font=L_FONT)
+        self.newItem_window.location_entry = Entry(container, width=20, font=NORM_FONT_MEDIUM_HIGH, bd=2,
+                                                   relief='ridge',
+                                                   bg='light yellow')
 
-        self.total_balance_label = tk.Label(container, text="Total Balance:", bg='lightblue')
-        self.total_balance_entry = tk.Entry(container, state='readonly')
-        
-        self.remarks_label = tk.Label(container, text="Remarks:", bg='lightblue')
-        self.remarks_entry = tk.Entry(container)
-        
+        self.newItem_window.party_name_entry.bind("<FocusOut>", self.load_previous_balance)
+
+        self.newItem_window.invoice_no_label = Label(container, text="Invoice No", bg='wheat', width=14, justify='left',
+                                                     anchor='w', font=L_FONT)
+        self.newItem_window.invoice_no_entry = Entry(container, width=20, font=NORM_FONT_MEDIUM_HIGH, bd=2,
+                                                     relief='ridge',
+                                                     bg='light yellow')
+
+        self.newItem_window.billing_amount_label = Label(container, text="Billing Amount", bg='wheat', width=14,
+                                                         justify='left', anchor='w', font=L_FONT)
+        self.newItem_window.billing_amount_entry = Entry(container, width=20, font=NORM_FONT_MEDIUM_HIGH, bd=2,
+                                                         relief='ridge',
+                                                         bg='light yellow')
+
+        self.newItem_window.amount_received_label = Label(container, text="Amount Received", bg='wheat', width=14,
+                                                          justify='left', anchor='w', font=L_FONT)
+        self.newItem_window.amount_received_entry = Entry(container, width=20, font=NORM_FONT_MEDIUM_HIGH, bd=2,
+                                                          relief='ridge',
+                                                          bg='light yellow')
+
+        self.newItem_window.receipt_ref_no_label = Label(container, text="MR No.", bg='wheat', width=14, justify='left',
+                                                         anchor='w', font=L_FONT)
+        self.newItem_window.receipt_ref_no_entry = Entry(container, width=20, font=NORM_FONT_MEDIUM_HIGH, bd=2,
+                                                         relief='ridge',
+                                                         bg='light yellow')
+
+        self.newItem_window.amount_balance_label = Label(container, text="Amount Balance", bg='wheat', width=14,
+                                                         justify='left', anchor='w', font=L_FONT)
+        self.newItem_window.amount_balance_entry = Entry(container, width=20, font=NORM_FONT_MEDIUM_HIGH, bd=2,
+                                                         relief='ridge',
+                                                         bg='light yellow')
+
+        self.newItem_window.previous_balance_label = Label(container, text="Previous Balance", bg='wheat', width=14,
+                                                           justify='left', anchor='w', font=L_FONT)
+        self.newItem_window.previous_balance_entry = Entry(container, width=20, font=NORM_FONT_MEDIUM_HIGH, bd=2,
+                                                           relief='ridge',
+                                                           bg='light yellow')
+
+        self.newItem_window.total_balance_label = Label(container, text="Total Balance", bg='wheat', width=14,
+                                                        justify='left', anchor='w', font=L_FONT)
+        self.newItem_window.total_balance_entry = Entry(container, width=20, font=NORM_FONT_MEDIUM_HIGH, bd=2,
+                                                        relief='ridge',
+                                                        bg='light yellow')
+
+        self.newItem_window.remarks_label = Label(container, text="Remarks", bg='wheat', width=14, justify='left',
+                                                  anchor='w', font=L_FONT)
+        self.newItem_window.remarks_entry = Entry(container, width=20, font=NORM_FONT_MEDIUM_HIGH, bd=2, relief='ridge',
+                                                  bg='light yellow')
+
         # Create a submit button to save the ledger entry
-        self.submit_button = tk.Button(container, text="Submit", command=self.submit_ledger)
-        self.statement_button = tk.Button(container, text="Generate Statement", command=self.generate_statement)
 
-        self.billing_amount_entry.bind("<KeyRelease>", self.update_amount_balance)
-        self.amount_received_entry.bind("<KeyRelease>", self.update_amount_balance)
-
-        
+        self.newItem_window.billing_amount_entry.bind("<KeyRelease>", self.update_amount_balance)
+        self.newItem_window.amount_received_entry.bind("<KeyRelease>", self.update_amount_balance)
 
         # Arrange the widgets using grid geometry manager
-        self.date_label.grid(row=1, column=0, sticky=tk.E, pady=5, padx=10)
-        self.date_entry.grid(row=1, column=1, pady=5, padx=10)
-        self.party_name_label.grid(row=2, column=0, sticky=tk.E, pady=5, padx=10)
-        self.party_name_entry.grid(row=2, column=1, pady=5, padx=10)
-        self.location_label.grid(row=3, column=0, sticky=tk.E, pady=5, padx=10)
-        self.location_entry.grid(row=3, column=1, pady=5, padx=10)
-        self.invoice_no_label.grid(row=4, column=0, sticky=tk.E, pady=5, padx=10)
-        self.invoice_no_entry.grid(row=4, column=1, pady=5, padx=10)
-        self.billing_amount_label.grid(row=5, column=0, sticky=tk.E, pady=5, padx=10)
-        self.billing_amount_entry.grid(row=5, column=1, pady=5, padx=10)
-        self.amount_received_label.grid(row=6, column=0, sticky=tk.E, pady=5, padx=10)
-        self.amount_received_entry.grid(row=6, column=1, pady=5, padx=10)
-        self.receipt_ref_no_label.grid(row=7, column=0, sticky=tk.E, pady=5, padx=10)
-        self.receipt_ref_no_entry.grid(row=7, column=1, pady=5, padx=10)
-        self.amount_balance_label.grid(row=8, column=0, sticky=tk.E, pady=5, padx=10)
-        self.amount_balance_entry.grid(row=8, column=1, pady=5, padx=10)
-        self.previous_balance_label.grid(row=9, column=0, sticky=tk.E, pady=5, padx=10)
-        self.previous_balance_entry.grid(row=9, column=1, pady=5, padx=10)
-        self.total_balance_label.grid(row=10, column=0, sticky=tk.E, pady=5, padx=10)
-        self.total_balance_entry.grid(row=10, column=1, pady=5, padx=10)
-        self.remarks_label.grid(row=11, column=0, sticky=tk.E, pady=5, padx=10)
-        self.remarks_entry.grid(row=11, column=1, pady=5, padx=10)
-        
-        self.submit_button.grid(row=12, columnspan=2, pady=10)
-        self.statement_button.grid(row=13, columnspan=2, pady=10)
+        self.newItem_window.date_label.grid(row=1, column=0, sticky=E, pady=5, padx=10)
+        self.newItem_window.date_entry.grid(row=1, column=1, pady=5, padx=10)
+        self.newItem_window.party_name_label.grid(row=2, column=0, sticky=E, pady=5, padx=10)
+        self.newItem_window.party_name_entry.grid(row=2, column=1, pady=5, padx=10)
+        self.newItem_window.location_label.grid(row=3, column=0, sticky=E, pady=5, padx=10)
+        self.newItem_window.location_entry.grid(row=3, column=1, pady=5, padx=10)
+        self.newItem_window.invoice_no_label.grid(row=4, column=0, sticky=E, pady=5, padx=10)
+        self.newItem_window.invoice_no_entry.grid(row=4, column=1, pady=5, padx=10)
+        self.newItem_window.billing_amount_label.grid(row=5, column=0, sticky=E, pady=5, padx=10)
+        self.newItem_window.billing_amount_entry.grid(row=5, column=1, pady=5, padx=10)
+        self.newItem_window.amount_received_label.grid(row=6, column=0, sticky=E, pady=5, padx=10)
+        self.newItem_window.amount_received_entry.grid(row=6, column=1, pady=5, padx=10)
+        self.newItem_window.receipt_ref_no_label.grid(row=7, column=0, sticky=E, pady=5, padx=10)
+        self.newItem_window.receipt_ref_no_entry.grid(row=7, column=1, pady=5, padx=10)
+        self.newItem_window.amount_balance_label.grid(row=8, column=0, sticky=E, pady=5, padx=10)
+        self.newItem_window.amount_balance_entry.grid(row=8, column=1, pady=5, padx=10)
+        self.newItem_window.previous_balance_label.grid(row=9, column=0, sticky=E, pady=5, padx=10)
+        self.newItem_window.previous_balance_entry.grid(row=9, column=1, pady=5, padx=10)
+        self.newItem_window.total_balance_label.grid(row=10, column=0, sticky=E, pady=5, padx=10)
+        self.newItem_window.total_balance_entry.grid(row=10, column=1, pady=5, padx=10)
+        self.newItem_window.remarks_label.grid(row=11, column=0, sticky=E, pady=5, padx=10)
+        self.newItem_window.remarks_entry.grid(row=11, column=1, pady=5, padx=10)
 
-        self.load_previous_balance()
+        # ---------------------------------Button Frame Start----------------------------------------
+        buttonFrame = Frame(self.newItem_window, width=100, height=100, bd=4, relief='ridge', bg="light yellow")
+        buttonFrame.grid(row=4, column=0, padx=10, pady=5, columnspan=3)
 
-    def load_previous_balance(self, event=None):
-        party_name_input = self.party_name_entry.get().strip()
-        
+        viewPDF = Button(buttonFrame, text="View Statement", fg="Black",
+                         font=NORM_FONT_MEDIUM_LOW, width=12, bg='light cyan', command=self.generate_statement)
+
+        cancel = Button(buttonFrame, text="Exit", fg="Black", command=self.newItem_window.destroy,
+                        font=NORM_FONT_MEDIUM_LOW, width=12, bg='light cyan')
+        submit = Button(buttonFrame, text="Submit", fg="Black", command=self.submit_ledger,
+                        font=NORM_FONT_MEDIUM_LOW, width=12, bg='light cyan')
+        submit.grid(row=0, column=0)
+        viewPDF.grid(row=0, column=1)
+        cancel.grid(row=0, column=2)
+
+        self.load_previous_balance(self.newItem_window)
+
+    def doNothing(self):
+        print("DISABLED")
+        # do nothing
+
+    def load_previous_balance(self, window, event=None):
+        party_name_input = window.party_name_entry.get().strip()
 
         if not party_name_input:
             return
@@ -117,7 +175,7 @@ class LedgerForm(tk.Toplevel):
         try:
             today = datetime.now()
             year = today.strftime("%Y")
-            dirname = "Expanse_Data\\" +  "\\Invoices"
+            dirname = "Expanse_Data\\" + "\\Invoices"
             if not os.path.exists(dirname):
                 print("Current year directory is not available , hence building one")
                 # os.makedirs(dirname)
@@ -125,14 +183,13 @@ class LedgerForm(tk.Toplevel):
             if os.path.exists(file_path):
                 print("exist")
                 try:
-                   
+
                     workbook = load_workbook(file_path)
-                    
+
                     sheet = workbook.active
-                    
+
                     # Find the last row with data
                     last_row = sheet.max_row
-                    
 
                     # Initialize latest total balance
                     latest_total_balance = None
@@ -143,10 +200,11 @@ class LedgerForm(tk.Toplevel):
                         if party_name:
                             party_name = party_name.strip()
                             if party_name.lower() == party_name_input.strip().lower():  # Case-insensitive comparison
-                                
-                                total_pending = sheet.cell(row=row, column=10).value  # Assuming total amount is in column 10
+
+                                total_pending = sheet.cell(row=row,
+                                                           column=10).value  # Assuming total amount is in column 10
                                 latest_total_balance = total_pending
-                                
+
                                 party_name_found = True
                                 break
 
@@ -159,7 +217,6 @@ class LedgerForm(tk.Toplevel):
                         # sheet.cell(row=new_row, column=10, value=<total_pending_amount>)
                         # Set latest_total_balance to some default value for new entry
                         latest_total_balance = 0.0
-
 
                     # Update the GUI entries with the captured balance
                     self.previous_balance_entry.config(state='normal')
@@ -190,11 +247,10 @@ class LedgerForm(tk.Toplevel):
         except Exception as e:
             messagebox.showerror("Error", f"Error occurred while loading previous balance: {e}")
 
-
     def update_amount_balance(self, event):
         billing_amount = self.billing_amount_entry.get()
         amount_received = self.amount_received_entry.get()
-        
+
         try:
             billing_amount_float = float(billing_amount)
             amount_received_float = float(amount_received)
@@ -220,7 +276,7 @@ class LedgerForm(tk.Toplevel):
             self.amount_balance_entry.config(state='readonly')
 
     def clear_form(self):
-    # Clear all entry fields
+        # Clear all entry fields
         self.date_entry.delete(0, tk.END)
         self.party_name_entry.delete(0, tk.END)
         self.location_entry.delete(0, tk.END)
@@ -250,13 +306,13 @@ class LedgerForm(tk.Toplevel):
             billing_amount_float = float(billing_amount)
             amount_received_float = float(amount_received)
             amount_balance_float = billing_amount_float - amount_received_float
-            
+
             previous_balance_float = float(previous_balance)
             total_balance_pending_float = previous_balance_float + amount_balance_float
             today = datetime.now()
             year = today.strftime("%Y")
             # Construct the file path for the Excel file
-            dirname = "Expanse_Data\\"  + "\\Invoices"
+            dirname = "Expanse_Data\\" + "\\Invoices"
             if not os.path.exists(dirname):
                 print("Current year directory is not available , hence building one")
                 os.makedirs(dirname)
@@ -264,17 +320,20 @@ class LedgerForm(tk.Toplevel):
             if not os.path.isfile(file_path):
                 wb = openpyxl.Workbook()
                 sheet = wb.active
-            
+
             # Load or create the workbook
             if os.path.exists(file_path):
                 workbook = load_workbook(file_path)
             else:
                 workbook = Workbook()
                 sheet = workbook.active
-                sheet.append(["Date", "Party Name", "Location", "Invoice No", "Billing Amount", "Amount Received", "MR No","Amount Balance","Previous Balance" ,"Total Balance", "Remarks"])
+                sheet.append(
+                    ["Date", "Party Name", "Location", "Invoice No", "Billing Amount", "Amount Received", "MR No",
+                     "Amount Balance", "Previous Balance", "Total Balance", "Remarks"])
 
             sheet = workbook.active
-            sheet.append([date, party_name, location, invoice_no, billing_amount_float, amount_received_float , mr_no, amount_balance_float,previous_balance, total_balance_pending_float, remarks])
+            sheet.append([date, party_name, location, invoice_no, billing_amount_float, amount_received_float, mr_no,
+                          amount_balance_float, previous_balance, total_balance_pending_float, remarks])
 
             workbook.save(file_path)
 
@@ -300,10 +359,10 @@ class LedgerForm(tk.Toplevel):
             messagebox.showerror("Input Error", "Billing Amount and Amount Received should be numbers.")
         except Exception as e:
             messagebox.showerror("Error", f"Error occurred: {e}")
-            
+
     def generate_statement(self):
         party_name = self.party_name_entry.get()
-        
+
         if not party_name:
             messagebox.showerror("Input Error", "Please enter the Party's Name.")
             return
@@ -326,14 +385,15 @@ class LedgerForm(tk.Toplevel):
             for row in sheet.iter_rows(values_only=True):
                 if row[1] == party_name:
                     records.append(row)
-            
+
             if records:
                 self.show_records(records)
             else:
                 messagebox.showinfo("No Records", "No records found for the given party.")
-        
+
         except InvalidFileException:
-            messagebox.showerror("File Error", f"The file '{file_path}' is not a valid Excel file. Please check the file format.")
+            messagebox.showerror("File Error",
+                                 f"The file '{file_path}' is not a valid Excel file. Please check the file format.")
         except Exception as e:
             messagebox.showerror("Error", f"Error occurred: {e}")
 
@@ -350,7 +410,7 @@ class LedgerForm(tk.Toplevel):
         self.records_window = Toplevel(self)
         self.records_window.title(f"Statement of Invoice for {month}, {year}")
         self.records_window.geometry("600x400")
-        self.records_window.configure(bg='lightblue')
+        self.records_window.configure(bg='wheat')
 
         # Define column names
         columns = [
@@ -369,15 +429,18 @@ class LedgerForm(tk.Toplevel):
 
         # Create labels for column names
         for i, column_name in enumerate(columns):
-            Label(self.records_window, text=column_name, font=("Helvetica", 10, "bold"), bg='lightblue').grid(row=0, column=i, padx=10, pady=5)
+            Label(self.records_window, text=column_name, font=("Helvetica", 10, "bold"), bg='wheat').grid(row=0,
+                                                                                                          column=i,
+                                                                                                          padx=10,
+                                                                                                          pady=5)
 
         # Display the records
         for i, record in enumerate(records):
             for j, value in enumerate(record):
-                Label(self.records_window, text=value, bg='lightblue').grid(row=i+1, column=j, padx=10, pady=5)
+                Label(self.records_window, text=value, bg='wheat').grid(row=i + 1, column=j, padx=10, pady=5)
 
         # Create a print button
-        print_button = Button( self.records_window,text="Print", command=lambda: self.print_window(self.records_window))
+        print_button = Button(self.records_window, text="Print", command=lambda: self.print_window(self.records_window))
         print_button.grid(row=len(records) + 2, columnspan=len(columns), pady=10)
 
     def print_window(self):
@@ -873,8 +936,6 @@ class LedgerForm(tk.Toplevel):
 
         dirname5 = "Expanse_Data\\" + year + "\\Invoices"
 
-        
-
         dirname18 = "Expanse_Data\\" + year + "\\Statements"
 
         dirname19 = "Expanse_Data\\" + year + "\\Transaction"
@@ -898,16 +959,12 @@ class LedgerForm(tk.Toplevel):
         print("VYOAM Dir Structure initialized")
         print("VYOAM Copying  common file start")
         shutil.copy("../Common_Files/Ashram_Voucher_Receipt_Template.xlsx", dirname4)
-       
-       
 
         shutil.copy("../Common_Files/Split_Donation_Open.xlsx", dirname22)
         shutil.copy("../Common_Files/Transaction_template.xlsx", dirname22)
         # shutil.copy("Common_Files\\stock_sales_account_template.xlsx", dirname27)
-       
 
         # copy booklets , if they do not exists
-       
 
         # copy booklets , if they do not exists
         filename_Ashram_Expanse_Voucher__booklet = dirname4 + "\\Ashram_Expanse_Voucher_Receipt_Booklet.xlsx"
@@ -916,7 +973,6 @@ class LedgerForm(tk.Toplevel):
             shutil.copy("../Common_Files/Ashram_Expanse_Voucher_Receipt_Booklet.xlsx", dirname4)
         else:
             print("Ashram_Expanse_Voucher booklet already exist")
-
 
 
 # Usage example:
@@ -929,4 +985,3 @@ if __name__ == "__main__":
     ]
     app.show_records(records)
     root.mainloop()
-    
