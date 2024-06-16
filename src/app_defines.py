@@ -16,6 +16,7 @@
 
 
 # constants defined for Application
+
 INDEX_ZERO = 0
 MAX_RECORD_ENTRY = 29
 DEFAULT = 1
